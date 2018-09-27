@@ -1,4 +1,3 @@
-
 #include <conf.h>
 #include <kernel.h>
 #include <proc.h>
@@ -6,30 +5,27 @@
 #include <sched.h>
 #include <math.h>
 
-#define  SETONE 	 1
-#define  SETHALF   0.5
-#define  SETZERO   0
+#define  SETONE 	1
+#define  SETHALF	0.5
+#define  SETZERO	0
 
 unsigned long currSP;
 extern int ctxsw(int, int, int, int);
 
 int resched()
 {
-	register struct	pentry	*optr;	
-	register struct	pentry	*nptr;	
-	int i,newEpoch;
-	int prev;
-	int nextProcess,maximumGoodness;
-	int exponentialSchedPriority;
+	register struct	pentry	*optr;
+	register struct	pentry	*nptr;
+	int i,newEpoch,nextProcess,maximumGoodness,exponentialSchedPriority;
 	(optr= &proctab[currpid]);
 	int classToBeScheduledCheck = getschedclass();
-	
-	if(classToBeScheduledCheck==EXPDISTSCHED) 
-	{
+
+	switch (classToBeScheduledCheck) {
+		case 1:
 		exponentialSchedPriority=expdev(0.1);
 				 if (optr->pstate == PRCURR){
 					optr->pstate = PRREADY;
-					insert(currpid,rdyhead,optr->pprio); 
+					insert(currpid,rdyhead,optr->pprio);
 				}
 				nextProcess = q[rdyhead].qnext;
 					while (q[nextProcess].qkey <(int) exponentialSchedPriority){
@@ -38,16 +34,15 @@ int resched()
 				if(nextProcess>NPROC) {
 				nextProcess=q[rdytail].qprev;
 			}
-	        nptr = &proctab[ (currpid = nextProcess) ]; 
-	        nptr->pstate = PRCURR;
-	        dequeue(nextProcess);
+					nptr = &proctab[ (currpid = nextProcess) ];
+					nptr->pstate = PRCURR;
+					dequeue(nextProcess);
 					#ifdef	RTCLOCK
-								preempt = QUANTUM;		
+								preempt = QUANTUM;
 					#endif
-	}
+				break;
 
-	else if (classToBeScheduledCheck==LINUXSCHED)
-	{
+			case 2:
 			newEpoch=SETONE;
 			proctab[currpid].quantum=preempt;
 			if(proctab[currpid].quantum == SETZERO){
@@ -65,15 +60,15 @@ int resched()
 				i = i + SETONE;
 			}
 
-			if(newEpoch==SETONE){ 
+			if(newEpoch==SETONE){
 			i = SETZERO;
 			do {
-				if(proctab[i].pstate!=PRFREE)
-					{	proctab[i].quantum=proctab[i].pprio+(int)(SETHALF*proctab[i].quantum);
+				if(proctab[i].pstate!=PRFREE) {	
+						proctab[i].quantum=proctab[i].pprio+(int)(SETHALF*proctab[i].quantum);
 						proctab[i].goodness=proctab[i].pprio;
 					}
 				i = i + SETONE;
-				
+
 			} while(i < NPROC);
 		}
 
@@ -90,30 +85,34 @@ int resched()
 					}
 				i = i + SETONE;
 			} while(i < NPROC);
-
-			nptr=&proctab[(currpid = dequeue(nextProcess))];
+			currpid = dequeue(nextProcess);
+			nptr=&proctab[currpid];
 			nptr->pstate = PRCURR;
 			preempt = nptr->quantum;
-	}
-	else
-	{
-			if ( ( (optr= &proctab[currpid])->pstate == PRCURR) &&
-			   (lastkey(rdytail)<optr->pprio)) { 
-				return(OK);
+			break;
+
+			default:
+					optr= &proctab[currpid];
+					
+					if ( ( optr->pstate == PRCURR) &&
+					   (lastkey(rdytail)<optr->pprio)) {
+						return(OK);
+					}
+					if (optr->pstate == PRCURR) {
+						optr->pstate = PRREADY;
+						insert(currpid,rdyhead,optr->pprio);
+					}
+					currpid = getlast(rdytail);
+					nptr = &proctab[ currpid ];
+					nptr->pstate = PRCURR;
+				#ifdef	RTCLOCK
+					preempt = QUANTUM;
+				#endif
+				break;
 			}
-			if (optr->pstate == PRCURR) {
-				optr->pstate = PRREADY;
-				insert(currpid,rdyhead,optr->pprio);
-			}
-			
-			nptr = &proctab[ (currpid = getlast(rdytail)) ]; 
-			nptr->pstate = PRCURR;
-		#ifdef	RTCLOCK
-			preempt = QUANTUM;
-		#endif
-	}
-	ctxsw((int)&optr->pesp, (int)optr->pirmask, (int)&nptr->pesp, (int)nptr->pirmask);
-	return OK;
-}
+
+			ctxsw((int)&optr->pesp, (int)optr->pirmask, (int)&nptr->pesp, (int)nptr->pirmask);
+			return OK;
 
 
+	}
