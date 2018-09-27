@@ -48,13 +48,16 @@ int resched()
 			proctab[currpid].quantum=preempt;
 			if(proctab[currpid].quantum == SETZERO){
 					proctab[currpid].goodness=SETZERO;
+					
 			}
 			else {
+					
 					proctab[currpid].goodness=proctab[currpid].pprio+proctab[currpid].quantum;
 			}
 
 			i = SETZERO;
 			do {
+			//	i = i + SETONE;
 				if( ( proctab[i].pstate==PRREADY || proctab[i].pstate==PRCURR ) && proctab[i].quantum!=SETZERO) {
 					newEpoch = SETZERO;
 				}
@@ -64,6 +67,7 @@ int resched()
 			if(newEpoch==SETONE){
 				i = SETZERO;
 				do {
+			//		i = i + SETONE;
 					if(proctab[i].pstate!=PRFREE) {	
 							proctab[i].quantum=proctab[i].pprio+(int)(SETHALF*proctab[i].quantum);
 							proctab[i].goodness=proctab[i].pprio;
@@ -80,6 +84,7 @@ int resched()
 			maximumGoodness = SETZERO;
 			i = SETZERO;
 			do {
+			//	i = i + SETONE;
 				if((proctab[i].pstate==PRREADY || proctab[i].pstate==PRCURR) && proctab[i].goodness>=maximumGoodness && proctab[i].quantum!=SETZERO){
 						maximumGoodness=proctab[i].goodness;
 						nextProcess=i;

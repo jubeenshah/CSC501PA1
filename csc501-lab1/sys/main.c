@@ -20,7 +20,7 @@ int main() {
 	int count = 0;
 	char buf[8];
 
-	srand(1234);
+	srand(12345);
 
 	kprintf("Please Input:\n");
 	while ((i = read(CONSOLE, buf, sizeof(buf))) < 1)
