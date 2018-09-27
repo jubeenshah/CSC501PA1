@@ -17,11 +17,11 @@ int resched()
 	register struct	pentry	*optr;
 	register struct	pentry	*nptr;
 	int i,newEpoch,nextProcess,maximumGoodness,exponentialSchedPriority;
-	(optr= &proctab[currpid]);
+	optr= &proctab[currpid];
 	int classToBeScheduledCheck = getschedclass();
 
 	switch (classToBeScheduledCheck) {
-		case 1:
+		case EXPDISTSCHED:
 		exponentialSchedPriority=expdev(0.1);
 				 if (optr->pstate == PRCURR){
 					optr->pstate = PRREADY;
@@ -34,7 +34,8 @@ int resched()
 				if(nextProcess>NPROC) {
 				nextProcess=q[rdytail].qprev;
 			}
-					nptr = &proctab[ (currpid = nextProcess) ];
+					currpid = nextProcess;
+					nptr = &proctab[currpid];
 					nptr->pstate = PRCURR;
 					dequeue(nextProcess);
 					#ifdef	RTCLOCK
@@ -42,35 +43,35 @@ int resched()
 					#endif
 				break;
 
-			case 2:
+			case LINUXSCHED:
 			newEpoch=SETONE;
 			proctab[currpid].quantum=preempt;
 			if(proctab[currpid].quantum == SETZERO){
-									proctab[currpid].goodness=SETZERO;
+					proctab[currpid].goodness=SETZERO;
 			}
 			else {
 					proctab[currpid].goodness=proctab[currpid].pprio+proctab[currpid].quantum;
 			}
 
 			i = SETZERO;
-			while (i < NPROC) {
+			do {
 				if( ( proctab[i].pstate==PRREADY || proctab[i].pstate==PRCURR ) && proctab[i].quantum!=SETZERO) {
 					newEpoch = SETZERO;
 				}
 				i = i + SETONE;
-			}
+			} while (i < NPROC);
 
 			if(newEpoch==SETONE){
-			i = SETZERO;
-			do {
-				if(proctab[i].pstate!=PRFREE) {	
-						proctab[i].quantum=proctab[i].pprio+(int)(SETHALF*proctab[i].quantum);
-						proctab[i].goodness=proctab[i].pprio;
+				i = SETZERO;
+				do {
+					if(proctab[i].pstate!=PRFREE) {	
+							proctab[i].quantum=proctab[i].pprio+(int)(SETHALF*proctab[i].quantum);
+							proctab[i].goodness=proctab[i].pprio;
 					}
-				i = i + SETONE;
+					i = i + SETONE;
 
-			} while(i < NPROC);
-		}
+				} while(i < NPROC);
+			}
 
 			if (optr->pstate == PRCURR) {
 				optr->pstate = PRREADY;
@@ -106,7 +107,7 @@ int resched()
 					nptr = &proctab[ currpid ];
 					nptr->pstate = PRCURR;
 				#ifdef	RTCLOCK
-					preempt = QUANTUM;
+				preempt = QUANTUM;
 				#endif
 				break;
 			}

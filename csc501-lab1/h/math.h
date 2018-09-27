@@ -1,8 +1,8 @@
 #ifndef math_h
 #define math_h
 
-//#define RAND_MAX 077777; 
-#define RAND_MAX 032767;
+#define RAND_MAX 077777; 
+//#define RAND_MAX 032767;
 //https://moodle-courses1819.wolfware.ncsu.edu/mod/forumng/discuss.php?d=8975
 /*
 	extern double pow(double base, int exponent);
