@@ -55,7 +55,7 @@ double expdev(double lambda) {
 }
 	
 
-Implementation Tips: Since Xinu does not provide any math library (i.e., math.h), you will implement log() by yourself. For log() implementation, you can use Taylor series (http://en.wikipedia.org/wiki/Taylor\_series), where n = 20 can give an reasonable approximation. Note that Xinu does not offer any format to print out a floating number, so you can first test your code with gcc in Linux and use it in Xinu. You can also roughly test it in Xinu by casting, e.g. kprintf("%d", (int) log(20)). You will also have to implement pow(). You are recommended to put expdev(), log(), and pow() in math.c and add it to Makefile. On the other hand, srand() and rand() functions are offered in lib/libxc/rand.c by Xinu.
+Implementation Tips: Since Xinu does not provide any math library (i.e., math.h), you will implement log() by yourself. For log() implementation, you can use Taylor series (http://en.wikipedia.org/wiki/Taylor_series), where n = 20 can give an reasonable approximation. Note that Xinu does not offer any format to print out a floating number, so you can first test your code with gcc in Linux and use it in Xinu. You can also roughly test it in Xinu by casting, e.g. kprintf("%d", (int) log(20)). You will also have to implement pow(). You are recommended to put expdev(), log(), and pow() in math.c and add it to Makefile. On the other hand, srand() and rand() functions are offered in lib/libxc/rand.c by Xinu.
 
 `double log(double x);  
 double pow(double x, int y);  
