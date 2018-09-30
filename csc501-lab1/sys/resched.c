@@ -136,11 +136,12 @@ int resched()
 			iterationCounter = SETZERO;
 			do {
 			//	iterationCounter = iterationCounter + SETONE;
-			//int checkProcessState =  proctab[iterationCounter].pstate;
-			// int checkProcessGoodness = proctab[iterationCounter].goodness;
-			// int checkProcessQuantum = proctab[iterationCounter].quantum;
-			//if ((checkProcessState == PRREADY || checkProcessState == PRCURR) && checkProcessGoodness >= maximumGoodness && checkProcessQuantum != SETZERO) {
-				if((proctab[iterationCounter].pstate==PRREADY || proctab[iterationCounter].pstate==PRCURR) && proctab[iterationCounter].goodness>=maximumGoodness && proctab[iterationCounter].quantum!=SETZERO){
+				
+				int checkProcessState =  proctab[iterationCounter].pstate;
+				int checkProcessGoodness = proctab[iterationCounter].goodness;
+				int checkProcessQuantum = proctab[iterationCounter].quantum;
+				if ((checkProcessState == PRREADY || checkProcessState == PRCURR) && checkProcessGoodness >= maximumGoodness && checkProcessQuantum != SETZERO) {
+				//if((proctab[iterationCounter].pstate==PRREADY || proctab[iterationCounter].pstate==PRCURR) && proctab[iterationCounter].goodness>=maximumGoodness && proctab[iterationCounter].quantum!=SETZERO){
 						maximumGoodness=proctab[iterationCounter].goodness;
 						nextProcess=iterationCounter;
 					}
