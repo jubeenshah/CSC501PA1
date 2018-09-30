@@ -88,16 +88,20 @@ int resched()
 			case LINUXSCHED:
 			forwardPass=SETONE;
 			proctab[currpid].quantum=preempt;
-			if(proctab[currpid].quantum == SETZERO){
+			if(proctab[currpid].quantum != SETZERO){
 
-					proctab[currpid].goodness=SETZERO;
+				// int currentProcessPriority = proctab[currpid].pprio;
+				// int currentProcessQuantum = proctab[currpid].quantum;
+				// proctab[currpid].goodness = currentProcessPriority + currentProcessQuantum;
+				proctab[currpid].goodness=proctab[currpid].pprio+proctab[currpid].quantum;
+
+
 
 			}
 			else {
-					// int currentProcessPriority = proctab[currpid].pprio;
-					// int currentProcessQuantum = proctab[currpid].quantum;
-					// proctab[currpid].goodness = currentProcessPriority + currentProcessQuantum;
-					proctab[currpid].goodness=proctab[currpid].pprio+proctab[currpid].quantum;
+
+					proctab[currpid].goodness=SETZERO;
+
 			}
 
 			iterationCounter = SETZERO;
