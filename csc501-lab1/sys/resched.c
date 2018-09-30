@@ -1,3 +1,5 @@
+//Added functionalities for EXPDISTSCHED and LINUXSCHED
+//resched.c 
 #include <conf.h>
 #include <kernel.h>
 #include <proc.h>
@@ -12,10 +14,22 @@
 unsigned long currSP;
 extern int ctxsw(int, int, int, int);
 
-int resched()
+/*-----------------------------------------------------------------------
+ *  * resched  --  reschedule processor to highest priority ready process
+ *   *
+ *    * Notes:	Upon entry, currpid gives current process id.
+ *     *		Proctab[currpid].pstate gives correct NEXT state for
+ *      *			current process if other than PRREADY.
+ *       *------------------------------------------------------------------------
+ *        */
+
+int resched()i
 {
+	//pointer to old process entry
 	register struct	pentry	*optr;
+	//pointer to new process entry
 	register struct	pentry	*nptr;
+	//Declaring Variables for a counter, iterationcounter, goodnessValue, and varaible for storing the exponential probability
 	int i,newEpoch,nextProcess,maximumGoodness,exponentialSchedPriority;
 	optr= &proctab[currpid];
 	int classToBeScheduledCheck = getschedclass();
@@ -39,7 +53,7 @@ int resched()
 					nptr->pstate = PRCURR;
 					dequeue(nextProcess);
 					#ifdef	RTCLOCK
-								preempt = QUANTUM;
+						preempt = QUANTUM;
 					#endif
 				break;
 
