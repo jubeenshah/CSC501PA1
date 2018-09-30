@@ -1,5 +1,5 @@
 //Added functionalities for EXPDISTSCHED and LINUXSCHED
-//resched.c 
+//resched.c
 #include <conf.h>
 #include <kernel.h>
 #include <proc.h>
@@ -23,72 +23,113 @@ extern int ctxsw(int, int, int, int);
  *       *------------------------------------------------------------------------
  *        */
 
-int resched()i
+int resched()
 {
 	//pointer to old process entry
 	register struct	pentry	*optr;
 	//pointer to new process entry
 	register struct	pentry	*nptr;
-	//Declaring Variables for a counter, iterationcounter, goodnessValue, and varaible for storing the exponential probability
-	int i,newEpoch,nextProcess,maximumGoodness,exponentialSchedPriority;
+	//Declaring Variables for a forwardPass, iterationcounter, goodnessValue, and varaible for storing the exponential probability
+	int iterationCounter = SETZERO;
+	int forwardPass = SETONE;
+	int nextProcess,maximumGoodness,exponentialSchedPriority;
 	optr= &proctab[currpid];
 	int classToBeScheduledCheck = getschedclass();
 
 	switch (classToBeScheduledCheck) {
 		case EXPDISTSCHED:
+		//check if classToBeScheduledCheck is 1
 		exponentialSchedPriority=expdev(0.1);
+		//assign in a priority to exponentialSchedPriority
 				 if (optr->pstate == PRCURR){
+					 //check if the state is '\001'
+					 	/* For reference
+					 		#define	PRCURR		'\001'		 process is currently running
+					 		#define	PRREADY		'\003'		 process is on ready queue
+					 	*/
+					//if so change the old process pointesr's process state to PRREADY
+					// '\003'
 					optr->pstate = PRREADY;
+					/*int insert(int proc, int head, int key);*/
+					// proc --> currpid, head --> the head, and the key is the process priority
+					// currpid --> currently executing process
 					insert(currpid,rdyhead,optr->pprio);
 				}
+				/* reference
+				int	qkey;		key on which the queue is ordered/
+				int	qnext;		pointer to next process or tail
+				int	qprev;		pointer to previous process or head
+				*/
+
+				//select Next process
 				nextProcess = q[rdyhead].qnext;
 					while (q[nextProcess].qkey <(int) exponentialSchedPriority){
-					nextProcess = q[nextProcess].qnext;
+						//Repeat until the priority of the current process is less than exponentialSchedPriority
+						nextProcess = q[nextProcess].qnext;
 				}
 				if(nextProcess>NPROC) {
+				//int	qprev;		pointer to previous process or head
 				nextProcess=q[rdytail].qprev;
 			}
+			//Updating the values for new process pointer
 					currpid = nextProcess;
 					nptr = &proctab[currpid];
+					//mark it currently running
 					nptr->pstate = PRCURR;
+			//dequeing the process
+			//int dequeue(int item);
 					dequeue(nextProcess);
+					//reset the preemption counter --> 10 the default clcok ticsk until preemption
 					#ifdef	RTCLOCK
 						preempt = QUANTUM;
 					#endif
 				break;
-
+				//check if classToBeScheduledCheck is 2
 			case LINUXSCHED:
-			newEpoch=SETONE;
+			forwardPass=SETONE;
 			proctab[currpid].quantum=preempt;
 			if(proctab[currpid].quantum == SETZERO){
+
 					proctab[currpid].goodness=SETZERO;
-					
+
 			}
 			else {
-					
+					// int currentProcessPriority = proctab[currpid].pprio;
+					// int currentProcessQuantum = proctab[currpid].quantum;
+					// proctab[currpid].goodness = currentProcessPriority + currentProcessQuantum;
 					proctab[currpid].goodness=proctab[currpid].pprio+proctab[currpid].quantum;
 			}
 
-			i = SETZERO;
+			iterationCounter = SETZERO;
 			do {
-			//	i = i + SETONE;
-				if( ( proctab[i].pstate==PRREADY || proctab[i].pstate==PRCURR ) && proctab[i].quantum!=SETZERO) {
-					newEpoch = SETZERO;
+			//	iterationCounter = iterationCounter + SETONE;
+
+			// int checkProcessState = proctab[iterationCounter].pstate;
+			// int checkProcessQuantum =  proctab[iterationCounter].quantum;
+			//if ((checkProcessState == PRREADY	|| checkProcessState == PRCURR) && checkProcessQuantum != 0) {
+				if( ( proctab[iterationCounter].pstate==PRREADY || proctab[iterationCounter].pstate==PRCURR ) && proctab[iterationCounter].quantum!=SETZERO) {
+					forwardPass = SETZERO;
 				}
-				i = i + SETONE;
-			} while (i < NPROC);
+				iterationCounter = iterationCounter + SETONE;
+			} while (iterationCounter < NPROC);
 
-			if(newEpoch==SETONE){
-				i = SETZERO;
+			if(forwardPass==SETONE){
+				iterationCounter = SETZERO;
 				do {
-			//		i = i + SETONE;
-					if(proctab[i].pstate!=PRFREE) {	
-							proctab[i].quantum=proctab[i].pprio+(int)(SETHALF*proctab[i].quantum);
-							proctab[i].goodness=proctab[i].pprio;
-					}
-					i = i + SETONE;
+			//		iterationCounter = iterationCounter + SETONE;
+					if(proctab[iterationCounter].pstate!=PRFREE) {
+						 // 	int processQuantum = proctab[iterationCounter].quantum;
+						 //   int processPriority = proctab[iterationCounter].pprio;
+						 //   int processGoodness = proctab[iterationCounter].goodness;
 
-				} while(i < NPROC);
+						 // processQuantum = processPriority + (int) (SETHALF * procprocessQuantum);
+						 // processGoodness = processPriority;
+							proctab[iterationCounter].quantum=proctab[iterationCounter].pprio+(int)(SETHALF*proctab[iterationCounter].quantum);
+							proctab[iterationCounter].goodness=proctab[iterationCounter].pprio;
+					}
+					iterationCounter = iterationCounter + SETONE;
+
+				} while(iterationCounter < NPROC);
 			}
 
 			if (optr->pstate == PRCURR) {
@@ -96,24 +137,29 @@ int resched()i
 				insert(currpid,rdyhead,optr->pprio);
 			}
 			maximumGoodness = SETZERO;
-			i = SETZERO;
+			iterationCounter = SETZERO;
 			do {
-			//	i = i + SETONE;
-				if((proctab[i].pstate==PRREADY || proctab[i].pstate==PRCURR) && proctab[i].goodness>=maximumGoodness && proctab[i].quantum!=SETZERO){
-						maximumGoodness=proctab[i].goodness;
-						nextProcess=i;
+			//	iterationCounter = iterationCounter + SETONE;
+				if((proctab[iterationCounter].pstate==PRREADY || proctab[iterationCounter].pstate==PRCURR) && proctab[iterationCounter].goodness>=maximumGoodness && proctab[iterationCounter].quantum!=SETZERO){
+						maximumGoodness=proctab[iterationCounter].goodness;
+						nextProcess=iterationCounter;
 					}
-				i = i + SETONE;
-			} while(i < NPROC);
+				iterationCounter = iterationCounter + SETONE;
+			} while(iterationCounter < NPROC);
 			currpid = dequeue(nextProcess);
 			nptr=&proctab[currpid];
 			nptr->pstate = PRCURR;
 			preempt = nptr->quantum;
+			/*
+			#ifdef	RTCLOCK
+			preempt = QUANTUM;
+			#endif
+			*/
 			break;
 
 			default:
 					optr= &proctab[currpid];
-					
+
 					if ( ( optr->pstate == PRCURR) &&
 					   (lastkey(rdytail)<optr->pprio)) {
 						return(OK);
