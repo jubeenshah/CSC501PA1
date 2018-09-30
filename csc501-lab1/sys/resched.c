@@ -97,7 +97,6 @@ int resched()
 					 int currentProcessPriority = proctab[currpid].pprio;
 					 int currentProcessQuantum = proctab[currpid].quantum;
 					 proctab[currpid].goodness = currentProcessPriority + currentProcessQuantum;
-					//proctab[currpid].goodness=proctab[currpid].pprio+proctab[currpid].quantum;
 			}
 
 			iterationCounter = SETZERO;
@@ -107,7 +106,6 @@ int resched()
 			 	int checkProcessState = proctab[iterationCounter].pstate;
 			 	int checkProcessQuantum =  proctab[iterationCounter].quantum;
 				if ((checkProcessState == PRREADY || checkProcessState == PRCURR) && checkProcessQuantum != SETZERO) {
-			//	if( ( proctab[iterationCounter].pstate==PRREADY || proctab[iterationCounter].pstate==PRCURR ) && proctab[iterationCounter].quantum!=SETZERO) {
 					forwardPass = SETZERO;
 				}
 				iterationCounter = iterationCounter + SETONE;
@@ -124,8 +122,6 @@ int resched()
 
 						 processQuantum = processPriority + (int) (SETHALF * processQuantum);
 						 processGoodness = processPriority;
-						//	proctab[iterationCounter].quantum=proctab[iterationCounter].pprio+(int)(SETHALF*proctab[iterationCounter].quantum);
-						//	proctab[iterationCounter].goodness=proctab[iterationCounter].pprio;
 					}
 					iterationCounter = iterationCounter + SETONE;
 
@@ -140,6 +136,10 @@ int resched()
 			iterationCounter = SETZERO;
 			do {
 			//	iterationCounter = iterationCounter + SETONE;
+			//int checkProcessState =  proctab[iterationCounter].pstate;
+			// int checkProcessGoodness = proctab[iterationCounter].goodness;
+			// int checkProcessQuantum = proctab[iterationCounter].quantum;
+			//if ((checkProcessState == PRREADY || checkProcessState == PRCURR) && checkProcessGoodness >= maximumGoodness && checkProcessQuantum != SETZERO) {
 				if((proctab[iterationCounter].pstate==PRREADY || proctab[iterationCounter].pstate==PRCURR) && proctab[iterationCounter].goodness>=maximumGoodness && proctab[iterationCounter].quantum!=SETZERO){
 						maximumGoodness=proctab[iterationCounter].goodness;
 						nextProcess=iterationCounter;
