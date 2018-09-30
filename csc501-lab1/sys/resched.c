@@ -109,7 +109,7 @@ int resched()
 			 	int checkProcessState = proctab[iterationCounter].pstate;
 			 	int checkProcessQuantum =  proctab[iterationCounter].quantum;
 				if ((checkProcessState == PRREADY || checkProcessState == PRCURR) \
-																			 && checkProcessQuantum != SETZERO) {
+								  && checkProcessQuantum != SETZERO) {
 					forwardPass = SETZERO;
 				}
 				iterationCounter = iterationCounter + SETONE;
@@ -144,9 +144,9 @@ int resched()
 				int processState =  proctab[iterationCounter].pstate;
 				int processGoodness = proctab[iterationCounter].goodness;
 				int processQuantum = proctab[iterationCounter].quantum;
-				if ((processState == PRREADY || processState == PRCURR) \
-															 			 && processGoodness>=maximumGoodness \
-															 			 && processQuantum != SETZERO) {
+				if ((processState == PRREADY || processState == PRCURR) 		\
+						    	     && processGoodness>=maximumGoodness 	\
+							     && processQuantum != SETZERO) {
 						maximumGoodness = proctab[iterationCounter].goodness;
 						nextProcess = iterationCounter;
 					}
